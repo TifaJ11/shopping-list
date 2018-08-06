@@ -2,41 +2,60 @@ import React, { Component } from 'react';
 import './App.css';
 
 class App extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      input: '',
-      toBuyList: [],
-      cartList: [],
-      error: ''
-    }
+// No need to send props to super unless you are accessing this.props in the constructor
+// Furthermore since there is no API call in the constructor, we can forego it entirely  
+  
+//   constructor(props) { 
+//     super(props) 
+//     this.state = {
+//       input: '',
+//       toBuyList: [],
+//       cartList: [],
+//       error: ''
+//     }
+//   }
+  
+  state = {
+    input: '',
+    toBuyList: [],
+    cartList: [],
+    error: ''
   }
 
-  onChange = e => this.setState({input: e.target.value, error: ''})
+  // Instead of taking in the whole event, we can destructure the target
+  onChange = ({ target }) => this.setState({ input: target.value, error: '' })
+
   onSubmit = e => {
+    // This should always be the first call
+    e.preventDefault()
+    
     const {input, toBuyList, cartList} = this.state
     const trimmedInput = input.trim()
     const inToBuyList = toBuyList.some(item => item.toLowerCase() === trimmedInput.toLowerCase())
     const inCartList = cartList.some(item => item.toLowerCase() === trimmedInput.toLowerCase())
     if (!inCartList && !inToBuyList) {
-      this.setState({toBuyList: [...toBuyList, trimmedInput], input: ''})
+      this.setState({ toBuyList: [...toBuyList, trimmedInput], input: '' })
     } else {
-      this.setState({error: 'This item is already in the list.'})
+      this.setState({ error: 'This item is already in the list.' })
     }
-    e.preventDefault()
   }
-  moveBetweenLists = e => {
+  
+  // Same as above, destructure target, this is purely syntactic sugar and isn't a requirement.
+  moveBetweenLists = ({ target }) => {
     const {cartList, toBuyList} = this.state
-    const value = e.target.value
-    if (e.target.checked) {
+    // You can destructure this
+    const { value } = target
+    if (target.checked) {
       const index = toBuyList.indexOf(value)
-      if (index >= 0) {
-        this.setState({cartList: [...cartList, value], toBuyList: toBuyList.filter((el, i) => i !== index)})
+      // >= is two arithmetic expressions, computationally its hardly different
+      // but since 0 is a valid value, let's do index > -1
+      if (index > -1) {
+        this.setState({ cartList: [...cartList, value], toBuyList: toBuyList.filter((el, i) => i !== index) })
       }
     } else {
       const index = cartList.indexOf(value)
-      if (index >= 0) {
-        this.setState({toBuyList: [...toBuyList, value], cartList: cartList.filter((el, i) => i !== index)})
+      if (index > -1) {
+        this.setState({ toBuyList: [...toBuyList, value], cartList: cartList.filter((el, i) => i !== index) })
       }
     }
   }
